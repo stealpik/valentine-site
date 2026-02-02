@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Valentine Exam Mobile Edition</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #ff9fb3, #ffd6de);
+    text-align: center;
+    padding: 12px;
+}
+
+h1 {
+    font-size: 26px;
+    margin: 16px 0;
+}
+
+#photos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.photo {
+    width: 100%;
+    height: 140px;
+    object-fit: cover;
+    border-radius: 16px;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.25);
+}
+
+.question {
+    font-size: 20px;
+    margin: 18px 0;
+}
+
+.answers button,
+.bigBtn {
+    width: 90%;
+    max-width: 420px;
+    padding: 16px;
+    margin: 8px 0;
+    font-size: 18px;
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+}
+
+.answers button {
+    background: white;
+}
+
+#yesBtn {
+    background: #4caf50;
+    color: white;
+    opacity: 0.5;
+}
+
+#noBtn {
+    background: #f44336;
+    color: white;
+    position: relative;
+}
+
+#finalButtons {
+    margin-top: 20px;
+}
+
+#final {
+    display: none;
+    font-size: 24px;
+    margin-top: 30px;
+}
+
+.hearts {
+    position: fixed;
+    font-size: 22px;
+    animation: floatUp 3s linear forwards;
+    pointer-events: none;
+}
+
+@keyframes floatUp {
+    to {
+        transform: translateY(-600px);
+        opacity: 0;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<h1>Valentine Qualification Test</h1>
+
+<div id="photos">
+    <img src="photo1.jpg" class="photo">
+    <img src="photo2.jpg" class="photo">
+    <img src="photo3.jpg" class="photo">
+    <img src="photo4.jpg" class="photo">
+</div>
+
+<div id="gameBox">
+    <div class="question" id="qText"></div>
+    <div class="answers" id="answers"></div>
+</div>
+
+<div id="finalButtons" style="display:none">
+    <h2>Final Question</h2>
+    <button id="yesBtn" class="bigBtn">YES 💘</button>
+    <button id="noBtn" class="bigBtn">No 🙃</button>
+</div>
+
+<div id="final">Correct choice. Valentine accepted.</div>
+
+<script>
+const quiz = [
+    { q: "Best date food", a: ["Salad", "Pizza", "More pizza"], correct: 2 },
+    { q: "Romance level", a: ["Medium", "Legendary"], correct: 1 },
+    { q: "Who is the best Valentine", a: ["You", "Still you"], correct: 1 }
+];
+
+let step = 0;
+
+const qText = document.getElementById("qText");
+const answersDiv = document.getElementById("answers");
+
+/* simple mobile friendly sounds */
+const clickSound = new Audio("https://actions.google.com/sounds/v1/cartoon/pop.ogg");
+const winSound = new Audio("https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg");
+const failSound = new Audio("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg");
+
+function vibrate(ms) {
+    if (navigator.vibrate) navigator.vibrate(ms);
+}
+
+function play(sound) {
+    sound.currentTime = 0;
+    sound.play().catch(() => {});
+}
+
+function showQuestion() {
+    const item = quiz[step];
+    qText.textContent = item.q;
+    answersDiv.innerHTML = "";
+
+    item.a.forEach((text, i) => {
+        const btn = document.createElement("button");
+        btn.textContent = text;
+        btn.onclick = () => answer(i);
+        answersDiv.appendChild(btn);
+    });
+}
+
+function answer(i) {
+    play(clickSound);
+
+    if (i === quiz[step].correct) {
+        vibrate(40);
+        step++;
+
+        if (step >= quiz.length) {
+            document.getElementById("gameBox").style.display = "none";
+            document.getElementById("finalButtons").style.display = "block";
+            unlockYes();
+        } else {
+            showQuestion();
+        }
+
+    } else {
+        vibrate([120, 60, 120]);
+        play(failSound);
+        alert("Wrong answer detected");
+    }
+}
+
+function unlockYes() {
+    const yesBtn = document.getElementById("yesBtn");
+    yesBtn.style.opacity = "1";
+}
+
+const noBtn = document.getElementById("noBtn");
+
+noBtn.addEventListener("click", () => {
+    play(failSound);
+    vibrate(80);
+    const x = Math.random() * (window.innerWidth - 200);
+    const y = Math.random() * (window.innerHeight - 80);
+    noBtn.style.position = "fixed";
+    noBtn.style.left = x + "px";
+    noBtn.style.top = y + "px";
+});
+
+document.getElementById("yesBtn").onclick = () => {
+    play(winSound);
+    vibrate([100, 50, 100, 50, 200]);
+    document.getElementById("finalButtons").style.display = "none";
+    document.getElementById("final").style.display = "block";
+    startHearts();
+};
+
+function startHearts() {
+    setInterval(() => {
+        const heart = document.createElement("div");
+        heart.className = "hearts";
+        heart.textContent = ["💖","💗","💝"][Math.floor(Math.random()*3)];
+        heart.style.left = Math.random() * window.innerWidth + "px";
+        heart.style.bottom = "-20px";
+        document.body.appendChild(heart);
+        setTimeout(() => heart.remove(), 3000);
+    }, 300);
+}
+
+showQuestion();
+</script>
+
+</body>
+</html>
